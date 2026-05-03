@@ -1,0 +1,11 @@
+{
+  "name": "Naija Career Hub",
+  "description": "A comprehensive job and scholarship portal for Nigerians with AI-powered CV and cover letter tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "AI-powered CV generation",
+    "Job and scholarship searching",
+    "Professional career advice",
+    "Application management"
+  ]
+}
