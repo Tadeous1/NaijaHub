@@ -15,8 +15,15 @@ export async function generateCV(userData: {
   experience: string;
   skills: string;
   targetRole: string;
+  template: 'Modern' | 'Traditional' | 'Creative';
 }) {
   try {
+    const templatePrompts = {
+      Modern: "Clean, minimalist, and bold. Use strong headers and efficient use of space. Highly legible for tech-forward companies.",
+      Traditional: "Standard business professional. Use clear, conservative formatting. Ideal for banking, oil & gas, and government agencies.",
+      Creative: "Dynamic and expressive. Focus on personality and storytelling while remaining professional. Great for marketing, design, and media."
+    };
+
     const prompt = `
       Create a professional CV for a job seeker with the following details:
       Full Name: ${userData.fullName}
@@ -24,6 +31,9 @@ export async function generateCV(userData: {
       Education: ${userData.education}
       Work Experience: ${userData.experience}
       Skills: ${userData.skills}
+      
+      TEMPLATE STYLE: ${userData.template}
+      STYLE GUIDELINES: ${templatePrompts[userData.template]}
       
       The output should be in Markdown format, well-structured with clear headings, bullet points, and a professional tone. 
       Focus on making it achievement-oriented and tailored for the Nigerian job market.

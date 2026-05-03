@@ -5,18 +5,21 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { PenTool, FileText, Send, Sparkles, Download, Copy, Check, ChevronRight, Loader2 } from 'lucide-react';
+import { PenTool, FileText, Send, Sparkles, Download, Copy, Check, ChevronRight, Loader2, FileDown } from 'lucide-react';
 import { generateCV, generateCoverLetter } from '../services/geminiService';
 import Markdown from 'react-markdown';
 import { cn } from '../lib/utils';
+import { jsPDF } from 'jspdf';
 
 type Tool = 'CV' | 'CoverLetter';
 
 export function AITools() {
   const [activeTool, setActiveTool] = useState<Tool>('CV');
+  const [selectedTemplate, setSelectedTemplate] = useState<'Modern' | 'Traditional' | 'Creative'>('Modern');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showFormats, setShowFormats] = useState(false);
 
   // Form states
   const [cvData, setCvData] = useState({
@@ -31,7 +34,7 @@ export function AITools() {
     setLoading(true);
     setResult(null);
     try {
-      const cv = await generateCV(cvData);
+      const cv = await generateCV({ ...cvData, template: selectedTemplate });
       setResult(cv || 'No content generated');
     } catch (err) {
       alert('Failed to generate CV. Please check your internet connection and try again.');
@@ -62,15 +65,37 @@ export function AITools() {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = (format: 'txt' | 'pdf' | 'docx' | 'md') => {
     if (!result) return;
-    const element = document.createElement("a");
-    const file = new Blob([result], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = `${activeTool}_Nigerian_JobPortal.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+    
+    const fileName = `${activeTool}_Nigerian_JobPortal`;
+    
+    if (format === 'pdf') {
+      const doc = new jsPDF();
+      
+      // Basic text wrapping for jsPDF
+      const splitText = doc.splitTextToSize(result, 180);
+      doc.text(splitText, 10, 10);
+      doc.save(`${fileName}.pdf`);
+    } else {
+      let type = 'text/plain';
+      let extension: string = format;
+      
+      if (format === 'md') type = 'text/markdown';
+      if (format === 'docx') {
+        type = 'application/msword';
+        extension = 'doc'; // Using .doc for accessibility
+      }
+
+      const element = document.createElement("a");
+      const file = new Blob([result], {type: type});
+      element.href = URL.createObjectURL(file);
+      element.download = `${fileName}.${extension}`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
+    setShowFormats(false);
   };
 
   return (
@@ -112,7 +137,36 @@ export function AITools() {
           className="bg-white p-8 md:p-12 rounded-[3rem] shadow-sm border border-slate-200"
         >
           {activeTool === 'CV' ? (
-            <form onSubmit={handleGenerateCV} className="space-y-6">
+            <div className="space-y-10">
+              <div className="space-y-4">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block pl-1">Choose Template Style</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {(['Modern', 'Traditional', 'Creative'] as const).map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setSelectedTemplate(t)}
+                      className={cn(
+                        "p-4 rounded-2xl border-2 transition-all text-left",
+                        selectedTemplate === t 
+                          ? "border-emerald-600 bg-emerald-50" 
+                          : "border-slate-100 hover:border-slate-200"
+                      )}
+                    >
+                      <div className={cn(
+                        "text-sm font-bold mb-1",
+                        selectedTemplate === t ? "text-emerald-700" : "text-slate-700"
+                      )}>{t}</div>
+                      <div className="text-[10px] text-slate-400 leading-tight">
+                        {t === 'Modern' && 'Clean & Bold'}
+                        {t === 'Traditional' && 'Professional'}
+                        {t === 'Creative' && 'Personality'}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <form onSubmit={handleGenerateCV} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input label="Full Name" value={cvData.fullName} onChange={(v) => setCvData({...cvData, fullName: v})} placeholder="e.g. Adeola Okafor" />
                 <Input label="Target Role" value={cvData.targetRole} onChange={(v) => setCvData({...cvData, targetRole: v})} placeholder="e.g. Marketing Manager" />
@@ -133,6 +187,7 @@ export function AITools() {
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Sparkles className="w-5 h-5" /> Generate Professional CV</>}
               </button>
             </form>
+          </div>
           ) : (
             <form onSubmit={handleGenerateCL} className="space-y-6">
               <Input label="Full Name" value={clData.fullName} onChange={(v) => setClData({...clData, fullName: v})} placeholder="e.g. Chinedu Balogun" />
@@ -196,14 +251,39 @@ export function AITools() {
                        <Check className="w-5 h-5 p-1 bg-white text-emerald-600 rounded-full" />
                        Content Ready
                     </h4>
-                    <div className="flex gap-2">
-                       <button 
-                         onClick={handleDownload}
-                         title="Download as .txt"
-                         className="p-2 hover:bg-emerald-500 rounded-lg transition-colors flex items-center gap-2"
-                       >
-                         <Download className="w-5 h-5" />
-                       </button>
+                    <div className="flex gap-2 relative">
+                       <div className="relative">
+                          <button 
+                            onClick={() => setShowFormats(!showFormats)}
+                            title="Download Options"
+                            className="p-2 hover:bg-emerald-500 rounded-lg transition-colors flex items-center gap-2"
+                          >
+                            <Download className="w-5 h-5" />
+                          </button>
+                          
+                          <AnimatePresence>
+                            {showFormats && (
+                              <motion.div 
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50 min-w-[160px]"
+                              >
+                                {(['txt', 'pdf', 'docx', 'md'] as const).map((fmt) => (
+                                  <button
+                                    key={fmt}
+                                    onClick={() => handleDownload(fmt)}
+                                    className="w-full text-left px-5 py-3 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 text-sm font-bold flex items-center justify-between border-b last:border-0 border-slate-50 transition-colors"
+                                  >
+                                    .{fmt.toUpperCase()}
+                                    <FileDown className="w-4 h-4 opacity-40" />
+                                  </button>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                       </div>
+                       
                        <button 
                          onClick={handleCopy}
                          title="Copy to clipboard"
