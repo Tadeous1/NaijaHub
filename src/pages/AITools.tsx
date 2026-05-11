@@ -16,6 +16,8 @@ type Tool = 'CV' | 'CoverLetter';
 export function AITools() {
   const [activeTool, setActiveTool] = useState<Tool>('CV');
   const [selectedTemplate, setSelectedTemplate] = useState<'Modern' | 'Traditional' | 'Creative'>('Modern');
+  const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg'>('base');
+  const [lineSpacing, setLineSpacing] = useState<'tight' | 'normal' | 'relaxed'>('normal');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -42,7 +44,13 @@ export function AITools() {
     setResult(null);
     try {
       const cv = await generateCV({ ...cvData, template: selectedTemplate });
-      setResult(cv || 'No content generated');
+      if (cv) {
+        // Sanitize: strip markdown wrappers if AI still includes them
+        const sanitized = cv.replace(/^```markdown\n/, '').replace(/^```\n/, '').replace(/\n```$/, '');
+        setResult(sanitized);
+      } else {
+        setResult('No content generated');
+      }
     } catch (err) {
       alert('Failed to generate CV. Please check your internet connection and try again.');
     } finally {
@@ -56,7 +64,12 @@ export function AITools() {
     setResult(null);
     try {
       const cl = await generateCoverLetter(clData);
-      setResult(cl || 'No content generated');
+      if (cl) {
+        const sanitized = cl.replace(/^```markdown\n/, '').replace(/^```\n/, '').replace(/\n```$/, '');
+        setResult(sanitized);
+      } else {
+        setResult('No content generated');
+      }
     } catch (err) {
       alert('Failed to generate Cover Letter. Please check your internet connection and try again.');
     } finally {
@@ -80,9 +93,20 @@ export function AITools() {
     if (format === 'pdf') {
       const doc = new jsPDF();
       
-      // Basic text wrapping for jsPDF
+      // Map sizes and spacing
+      const sizePt = fontSize === 'sm' ? 10 : fontSize === 'base' ? 12 : 14;
+      const lineHeight = lineSpacing === 'tight' ? 1.15 : lineSpacing === 'normal' ? 1.5 : 2;
+      
+      doc.setFontSize(sizePt);
+      // splitTextToSize uses the current font settings
       const splitText = doc.splitTextToSize(result, 180);
-      doc.text(splitText, 10, 10);
+      
+      // We can't easily use a global line height in doc.text for multiline arrays 
+      // without manually calculating offsets if we want perfect control, 
+      // but doc.text with an array usually uses a default spacing.
+      // However, we can use doc.text(splitText, 10, 10, { lineHeightFactor: lineHeight });
+      
+      doc.text(splitText, 10, 10, { lineHeightFactor: lineHeight });
       doc.save(`${fileName}.pdf`);
     } else {
       let type = 'text/plain';
@@ -147,29 +171,123 @@ export function AITools() {
             <div className="space-y-10">
               <div className="space-y-4">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block pl-1">Choose Template Style</label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-4">
                   {(['Modern', 'Traditional', 'Creative'] as const).map((t) => (
                     <button
                       key={t}
                       onClick={() => setSelectedTemplate(t)}
                       className={cn(
-                        "p-4 rounded-2xl border-2 transition-all text-left",
+                        "p-2 rounded-[2rem] border-2 transition-all text-left flex flex-col group",
                         selectedTemplate === t 
-                          ? "border-emerald-600 bg-emerald-50" 
-                          : "border-slate-100 hover:border-slate-200"
+                          ? "border-emerald-600 bg-emerald-50 ring-4 ring-emerald-50" 
+                          : "border-slate-100 hover:border-slate-200 bg-white"
                       )}
                     >
+                      {/* Visual Preview */}
                       <div className={cn(
-                        "text-sm font-bold mb-1",
-                        selectedTemplate === t ? "text-emerald-700" : "text-slate-700"
-                      )}>{t}</div>
-                      <div className="text-[10px] text-slate-400 leading-tight">
-                        {t === 'Modern' && 'Clean & Bold'}
-                        {t === 'Traditional' && 'Professional'}
-                        {t === 'Creative' && 'Personality'}
+                        "w-full aspect-[3/4] rounded-2xl mb-3 overflow-hidden border transition-all p-2",
+                        selectedTemplate === t ? "border-emerald-200 bg-white shadow-inner" : "border-slate-50 bg-slate-50 shadow-sm"
+                      )}>
+                        {t === 'Modern' && (
+                          <div className="space-y-1.5 h-full opacity-60">
+                            <div className="w-12 h-1 bg-emerald-600 mb-2" />
+                            <div className="w-full h-0.5 bg-slate-200" />
+                            <div className="grid grid-cols-2 gap-1">
+                              <div className="w-full h-8 bg-slate-100 rounded-sm" />
+                              <div className="w-full h-8 bg-slate-100 rounded-sm" />
+                            </div>
+                            <div className="w-2/3 h-0.5 bg-slate-200" />
+                            <div className="space-y-1">
+                              <div className="w-full h-0.5 bg-slate-100" />
+                              <div className="w-full h-0.5 bg-slate-100" />
+                            </div>
+                          </div>
+                        )}
+                        {t === 'Traditional' && (
+                          <div className="flex flex-col items-center space-y-1.5 h-full opacity-60">
+                            <div className="w-16 h-1 bg-slate-800 mb-2" />
+                            <div className="w-20 h-0.5 bg-slate-300" />
+                            <div className="w-full space-y-1.5 pt-1">
+                              <div className="w-full h-0.5 bg-slate-200" />
+                              <div className="w-full h-0.5 bg-slate-200" />
+                              <div className="w-full h-0.5 bg-slate-200" />
+                            </div>
+                            <div className="w-full pt-2">
+                              <div className="w-12 h-1 bg-slate-400 mb-1" />
+                              <div className="w-full h-0.5 bg-slate-100" />
+                            </div>
+                          </div>
+                        )}
+                        {t === 'Creative' && (
+                          <div className="flex gap-2 h-full opacity-60">
+                            <div className="w-1/3 bg-emerald-900/10 rounded-lg p-1 space-y-1">
+                              <div className="w-4 h-4 bg-emerald-600/20 rounded-full mx-auto" />
+                              <div className="w-full h-0.5 bg-emerald-600/20" />
+                              <div className="w-full h-0.5 bg-emerald-600/20" />
+                            </div>
+                            <div className="flex-1 space-y-2">
+                              <div className="w-12 h-1 bg-emerald-600" />
+                              <div className="space-y-1">
+                                <div className="w-full h-0.5 bg-slate-200" />
+                                <div className="w-full h-0.5 bg-slate-200" />
+                              </div>
+                              <div className="w-full h-2 bg-emerald-50 rounded-sm" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="px-1 pb-1">
+                        <div className={cn(
+                          "text-xs font-bold mb-0.5",
+                          selectedTemplate === t ? "text-emerald-700" : "text-slate-700"
+                        )}>{t}</div>
+                        <div className="text-[10px] text-slate-400 leading-tight">
+                          {t === 'Modern' && 'Clean & Bold'}
+                          {t === 'Traditional' && 'Professional'}
+                          {t === 'Creative' && 'Personality'}
+                        </div>
                       </div>
                     </button>
                   ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block pl-1">Font Size</label>
+                  <div className="flex bg-slate-50 p-1 rounded-xl gap-1">
+                    {(['sm', 'base', 'lg'] as const).map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => setFontSize(size)}
+                        className={cn(
+                          "flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all",
+                          fontSize === size ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                        )}
+                      >
+                        {size === 'sm' ? 'Small' : size === 'base' ? 'Normal' : 'Large'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block pl-1">Line Spacing</label>
+                  <div className="flex bg-slate-50 p-1 rounded-xl gap-1">
+                    {(['tight', 'normal', 'relaxed'] as const).map((spacing) => (
+                      <button
+                        key={spacing}
+                        onClick={() => setLineSpacing(spacing)}
+                        className={cn(
+                          "flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all",
+                          lineSpacing === spacing ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                        )}
+                      >
+                        {spacing === 'tight' ? 'Tight' : spacing === 'normal' ? 'Normal' : 'Relaxed'}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -328,9 +446,15 @@ export function AITools() {
                        </button>
                     </div>
                  </div>
-                 <div className="flex-1 overflow-y-auto p-12 prose prose-emerald max-w-none prose-sm font-sans">
-                    <Markdown>{result!}</Markdown>
-                 </div>
+                  <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50/50">
+                    <div className={cn(
+                      "bg-white shadow-lg border border-slate-100 rounded-xl p-8 md:p-12 min-h-full mx-auto max-w-3xl prose prose-emerald prose-headings:tracking-tight prose-p:text-slate-600",
+                      fontSize === 'sm' ? "prose-sm" : fontSize === 'base' ? "prose-base" : "prose-lg",
+                      lineSpacing === 'tight' ? "leading-tight" : lineSpacing === 'normal' ? "leading-normal" : "leading-relaxed"
+                    )}>
+                       <Markdown>{result!}</Markdown>
+                    </div>
+                  </div>
               </motion.div>
             )}
           </AnimatePresence>

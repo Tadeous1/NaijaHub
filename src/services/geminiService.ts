@@ -25,9 +25,15 @@ export async function generateCV(userData: {
     };
 
     const prompt = `
-      Create a professional CV for a job seeker with the following details:
+      Create a PROFESSIONAL and READY-TO-USE CV for a job seeker. 
+      Important: Output ONLY the polished text content. Do NOT wrap your response in markdown code blocks or use backticks at the start or end.
+      Important: Do NOT include placeholder text like "(Replace with your...)" or "[Add skills]". If the user provided specific details, use them. If they are sparse, expand professionally based on the Target Role.
+      
+      USER DETAILS:
       Full Name: ${userData.fullName}
       Target Role: ${userData.targetRole}
+      Email: ${userData.email}
+      Phone: ${userData.phone}
       Education: ${userData.education}
       Work Experience: ${userData.experience}
       Skills: ${userData.skills}
@@ -35,8 +41,14 @@ export async function generateCV(userData: {
       TEMPLATE STYLE: ${userData.template}
       STYLE GUIDELINES: ${templatePrompts[userData.template]}
       
-      The output should be in Markdown format, well-structured with clear headings, bullet points, and a professional tone. 
-      Focus on making it achievement-oriented and tailored for the Nigerian job market.
+      STRUCTURE:
+      - Header: Name and Contact Info
+      - Professional Summary: Achievement-oriented, tailored for Nigeria
+      - Key Skills: Grouped logically
+      - Professional Experience: Reverse chronological, use bullet points for achievements
+      - Education: Degree and Institution
+      
+      Output the final document in plain markdown (using # for headers, * for bullets) but WITHOUT backticks.
     `;
 
     const response = await ai.models.generateContent({
