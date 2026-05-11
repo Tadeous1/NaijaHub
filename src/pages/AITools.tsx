@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PenTool, FileText, Send, Sparkles, Download, Copy, Check, ChevronRight, Loader2, FileDown } from 'lucide-react';
 import { generateCV, generateCoverLetter } from '../services/geminiService';
@@ -22,6 +22,7 @@ export function AITools() {
   const [result, setResult] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showFormats, setShowFormats] = useState(false);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   // Form states
   const [cvData, setCvData] = useState({
@@ -48,6 +49,10 @@ export function AITools() {
         // Sanitize: strip markdown wrappers if AI still includes them
         const sanitized = cv.replace(/^```markdown\n/, '').replace(/^```\n/, '').replace(/\n```$/, '');
         setResult(sanitized);
+        // Scroll to result on mobile
+        if (window.innerWidth < 1024) {
+          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+        }
       } else {
         setResult('No content generated');
       }
@@ -67,6 +72,10 @@ export function AITools() {
       if (cl) {
         const sanitized = cl.replace(/^```markdown\n/, '').replace(/^```\n/, '').replace(/\n```$/, '');
         setResult(sanitized);
+        // Scroll to result on mobile
+        if (window.innerWidth < 1024) {
+          setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+        }
       } else {
         setResult('No content generated');
       }
@@ -131,23 +140,23 @@ export function AITools() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-12 text-center md:text-left flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="mb-12 text-center md:text-left flex flex-col md:flex-row md:items-center justify-between gap-8">
         <div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center md:justify-start gap-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center md:justify-start gap-4">
              AI Career Suite <Sparkles className="w-8 h-8 text-emerald-500" />
           </h1>
-          <p className="text-gray-500 max-w-xl font-sans">
+          <p className="text-gray-500 max-w-xl font-sans text-sm md:text-base px-4 md:px-0">
             Use the power of Generative AI to create professional documents tailored for the Nigerian corporate world.
           </p>
         </div>
         
-        <div className="inline-flex bg-gray-100 p-1.5 rounded-2xl">
+        <div className="flex bg-gray-100 p-1 rounded-2xl mx-4 md:mx-0">
           {(['CV', 'CoverLetter'] as Tool[]).map((tool) => (
             <button
               key={tool}
               onClick={() => { setActiveTool(tool); setResult(null); }}
               className={cn(
-                "px-8 py-3 rounded-xl text-sm font-bold transition-all",
+                "flex-1 md:px-8 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all",
                 activeTool === tool 
                   ? "bg-white text-emerald-600 shadow-md" 
                   : "text-gray-500 hover:text-gray-700 hover:bg-white/50"
@@ -159,25 +168,25 @@ export function AITools() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
         {/* Form Column */}
         <motion.div 
           key={activeTool}
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white p-8 md:p-12 rounded-[3rem] shadow-sm border border-slate-200"
+          className="bg-white p-6 sm:p-8 md:p-12 rounded-[2rem] md:rounded-[3rem] shadow-sm border border-slate-200"
         >
           {activeTool === 'CV' ? (
             <div className="space-y-10">
               <div className="space-y-4">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block pl-1">Choose Template Style</label>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {(['Modern', 'Traditional', 'Creative'] as const).map((t) => (
                     <button
                       key={t}
                       onClick={() => setSelectedTemplate(t)}
                       className={cn(
-                        "p-2 rounded-[2rem] border-2 transition-all text-left flex flex-col group",
+                        "p-4 sm:p-2 rounded-[2rem] border-2 transition-all text-left flex flex-row sm:flex-col items-center sm:items-start gap-4 sm:gap-0 group",
                         selectedTemplate === t 
                           ? "border-emerald-600 bg-emerald-50 ring-4 ring-emerald-50" 
                           : "border-slate-100 hover:border-slate-200 bg-white"
@@ -185,7 +194,7 @@ export function AITools() {
                     >
                       {/* Visual Preview */}
                       <div className={cn(
-                        "w-full aspect-[3/4] rounded-2xl mb-3 overflow-hidden border transition-all p-2",
+                        "w-20 sm:w-full aspect-[3/4] rounded-xl sm:rounded-2xl sm:mb-3 overflow-hidden border transition-all p-2 flex-shrink-0",
                         selectedTemplate === t ? "border-emerald-200 bg-white shadow-inner" : "border-slate-50 bg-slate-50 shadow-sm"
                       )}>
                         {t === 'Modern' && (
@@ -363,20 +372,20 @@ export function AITools() {
         </motion.div>
 
         {/* Result Column */}
-        <div className="lg:sticky lg:top-24">
+        <div ref={resultRef} className="lg:sticky lg:top-24 mt-8 lg:mt-0">
           <AnimatePresence mode="wait">
             {!result && !loading ? (
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white border-2 border-dashed border-slate-200 rounded-[3rem] p-12 text-center flex flex-col items-center justify-center h-[600px]"
+                className="bg-white border-2 border-dashed border-slate-200 rounded-[2rem] md:rounded-[3rem] p-8 md:p-12 text-center flex flex-col items-center justify-center h-[400px] md:h-[600px]"
               >
-                 <div className="w-20 h-20 bg-indigo-50 rounded-3xl shadow-sm flex items-center justify-center text-indigo-500 mb-6 font-bold">
+                 <div className="w-16 h-16 md:w-20 md:h-20 bg-indigo-50 rounded-3xl shadow-sm flex items-center justify-center text-indigo-500 mb-6 font-bold">
                     AI
                  </div>
-                 <h3 className="text-2xl font-bold text-slate-800 mb-2">Ready to Build</h3>
-                 <p className="text-slate-500 font-sans max-w-xs mb-8">Fill out the form to generate a professionally indexed document tailored for the Nigerian market.</p>
+                 <h3 className="text-xl md:text-2xl font-bold text-slate-800 mb-2">Ready to Build</h3>
+                 <p className="text-slate-500 font-sans max-w-xs mb-8 text-sm md:text-base">Fill out the form to generate a professionally indexed document tailored for the Nigerian market.</p>
                  <div className="flex gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-300 animate-bounce delay-0" />
                     <div className="w-2 h-2 rounded-full bg-indigo-300 animate-bounce delay-75" />
@@ -387,17 +396,17 @@ export function AITools() {
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="bg-emerald-900 rounded-[3rem] p-12 text-center flex flex-col items-center justify-center h-[600px] border border-emerald-800"
+                className="bg-emerald-900 rounded-[2rem] md:rounded-[3rem] p-8 md:p-12 text-center flex flex-col items-center justify-center h-[400px] md:h-[600px] border border-emerald-800"
               >
-                 <Loader2 className="w-16 h-16 text-emerald-400 animate-spin mb-6" />
-                 <h3 className="text-2xl font-bold text-white mb-2">Gemini is Thinking...</h3>
-                 <p className="text-emerald-100/60 font-sans max-w-xs">Our AI is crafting your document. This usually takes just a few seconds.</p>
+                 <Loader2 className="w-12 h-12 md:w-16 md:h-16 text-emerald-400 animate-spin mb-6" />
+                 <h3 className="text-xl md:text-2xl font-bold text-white mb-2">Gemini is Thinking...</h3>
+                 <p className="text-emerald-100/60 font-sans max-w-xs text-sm">Our AI is crafting your document. This usually takes just a few seconds.</p>
               </motion.div>
             ) : (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-[3rem] shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[700px]"
+                className="bg-white rounded-[2rem] md:rounded-[3rem] shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[600px] md:h-[700px]"
               >
                  <div className="bg-emerald-600 p-6 flex justify-between items-center text-white">
                     <h4 className="font-bold flex items-center gap-2 tracking-tight">

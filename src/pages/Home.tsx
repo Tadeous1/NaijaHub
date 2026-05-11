@@ -26,23 +26,23 @@ const item = {
 
 export function Home() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-full">
-      <main className="grid grid-cols-1 md:grid-cols-12 gap-5 auto-rows-[160px]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8 h-full">
+      <main className="grid grid-cols-1 md:grid-cols-12 gap-5 md:auto-rows-[160px]">
         {/* Search & Hero Section (Bento Primary) */}
-        <section className="md:col-span-8 md:row-span-2 bg-emerald-900 rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden flex flex-col justify-center border border-emerald-800 shadow-xl">
+        <section className="md:col-span-8 md:row-span-2 bg-emerald-900 rounded-[2.5rem] p-6 sm:p-8 md:p-12 relative overflow-hidden flex flex-col justify-center border border-emerald-800 shadow-xl min-h-[320px] md:min-h-0">
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-800 rounded-full -mr-20 -mt-20 opacity-50 blur-3xl"></div>
           <motion.h1 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="text-3xl md:text-5xl font-bold text-white mb-4 z-10 tracking-tight leading-tight"
           >
-            Find your next big <br /> break in Nigeria.
+            Find your next big <br className="hidden sm:block" /> break in Nigeria.
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-emerald-100 mb-8 z-10 max-w-lg text-lg opacity-80"
+            className="text-emerald-100 mb-6 md:mb-8 z-10 max-w-lg text-base md:text-lg opacity-80"
           >
             Connecting local talent with global opportunities across Lagos, Abuja, and beyond.
           </motion.p>
@@ -50,17 +50,17 @@ export function Home() {
             <input 
               type="text" 
               placeholder="Job title, keyword, or company..." 
-              className="flex-grow px-4 py-3 text-sm focus:outline-none text-slate-900 font-medium"
+              className="flex-grow px-4 py-3 text-sm focus:outline-none text-slate-900 font-medium w-full"
             />
             <div className="hidden sm:block w-px h-10 bg-slate-200 my-auto"></div>
-            <button className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2">
+            <button className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto">
               <Search className="w-4 h-4" /> Search
             </button>
           </div>
         </section>
 
         {/* AI CV Builder (Bento Tool) */}
-        <section className="md:col-span-4 md:row-span-2 bg-white border border-slate-200 rounded-[2.5rem] p-8 flex flex-col justify-between shadow-sm group hover:border-indigo-200 transition-all">
+        <section className="md:col-span-4 md:row-span-2 bg-white border border-slate-200 rounded-[2.5rem] p-6 sm:p-8 flex flex-col justify-between shadow-sm group hover:border-indigo-200 transition-all min-h-[320px] md:min-h-0">
           <div>
             <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
               <PenTool className="w-6 h-6" />
@@ -79,7 +79,7 @@ export function Home() {
         </section>
 
         {/* Featured Jobs (Bento List) */}
-        <section className="md:col-span-4 md:row-span-3 bg-white border border-slate-200 rounded-[2.5rem] p-8 flex flex-col shadow-sm overflow-hidden">
+        <section className="md:col-span-4 md:row-span-3 bg-white border border-slate-200 rounded-[2.5rem] p-6 sm:p-8 flex flex-col shadow-sm overflow-hidden min-h-[400px] md:min-h-0">
           <div className="flex justify-between items-center mb-6">
             <h3 className="font-bold text-slate-800 text-lg">Hot Jobs</h3>
             <Link to="/jobs" className="text-xs font-bold text-emerald-600 hover:underline">View All</Link>
@@ -104,7 +104,7 @@ export function Home() {
         </section>
 
         {/* Scholarships (Bento Info) */}
-        <section className="md:col-span-5 md:row-span-3 bg-white border border-slate-200 rounded-[2.5rem] p-8 flex flex-col shadow-sm">
+        <section className="md:col-span-5 md:row-span-3 bg-white border border-slate-200 rounded-[2.5rem] p-6 sm:p-8 flex flex-col shadow-sm min-h-[400px] md:min-h-0">
           <div className="flex justify-between items-center mb-6">
             <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
               Scholarships <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
@@ -127,7 +127,7 @@ export function Home() {
         </section>
 
         {/* Insights (Bento Accent) */}
-        <section className="md:col-span-3 md:row-span-3 bg-emerald-50 border border-emerald-100 rounded-[2.5rem] p-8 flex flex-col shadow-sm">
+        <section className="md:col-span-3 md:row-span-3 bg-emerald-50 border border-emerald-100 rounded-[2.5rem] p-6 sm:p-8 flex flex-col shadow-sm min-h-[300px] md:min-h-0">
           <h3 className="font-bold text-emerald-900 text-lg mb-6 flex items-center gap-2">
             Career Lab <Lightbulb className="w-5 h-5 text-amber-500" />
           </h3>

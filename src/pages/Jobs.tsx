@@ -24,9 +24,9 @@ export function Jobs() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4 tracking-tight">Find Your Next Job</h1>
-        <p className="text-gray-500 font-sans max-w-2xl text-lg">Browse through verified job openings across Nigeria. Use the filters to find roles that match your experience level.</p>
+      <div className="mb-8 md:mb-12">
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight text-center md:text-left">Find Your Next Job</h1>
+        <p className="text-gray-500 font-sans max-w-2xl text-base md:text-lg text-center md:text-left mx-auto md:mx-0">Browse through verified job openings across Nigeria. Use the filters to find roles that match your experience level.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
