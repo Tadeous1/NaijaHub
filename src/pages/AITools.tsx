@@ -26,7 +26,14 @@ export function AITools() {
     fullName: '', email: '', phone: '', education: '', experience: '', skills: '', targetRole: ''
   });
   const [clData, setClData] = useState({
-    fullName: '', jobTitle: '', companyName: '', experienceSummary: '', keySkills: ''
+    fullName: '', 
+    jobTitle: '', 
+    companyName: '', 
+    experienceSummary: '', 
+    keySkills: '',
+    hiringManager: '',
+    companyValues: '',
+    tone: 'Professional' as 'Professional' | 'Enthusiastic' | 'Confident'
   });
 
   const handleGenerateCV = async (e: React.FormEvent) => {
@@ -191,19 +198,47 @@ export function AITools() {
           ) : (
             <form onSubmit={handleGenerateCL} className="space-y-6">
               <Input label="Full Name" value={clData.fullName} onChange={(v) => setClData({...clData, fullName: v})} placeholder="e.g. Chinedu Balogun" />
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input label="Job Title Applying For" value={clData.jobTitle} onChange={(v) => setClData({...clData, jobTitle: v})} placeholder="e.g. Sales Executive" />
                 <Input label="Company Name" value={clData.companyName} onChange={(v) => setClData({...clData, companyName: v})} placeholder="e.g. Zenith Bank" />
               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Input label="Hiring Manager (Optional)" value={clData.hiringManager} onChange={(v) => setClData({...clData, hiringManager: v})} placeholder="e.g. Mrs. Adeoye" />
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block pl-1">Cover Letter Tone</label>
+                  <div className="flex gap-2">
+                    {(['Professional', 'Enthusiastic', 'Confident'] as const).map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setClData({...clData, tone: t})}
+                        className={cn(
+                          "px-3 py-2 rounded-xl text-[10px] font-bold border transition-all flex-1",
+                          clData.tone === t 
+                            ? "bg-emerald-50 border-emerald-500 text-emerald-700" 
+                            : "bg-white border-slate-100 text-slate-500 hover:border-slate-300"
+                        )}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <Input label="Company Values/Mission (To Tailor Content)" value={clData.companyValues} onChange={(v) => setClData({...clData, companyValues: v})} placeholder="e.g. Innovation, Customer First, Integrity" />
+
               <Textarea label="Brief Summary of Experience" value={clData.experienceSummary} onChange={(v) => setClData({...clData, experienceSummary: v})} placeholder="What makes you the best fit for this role?" rows={4} />
-              <Textarea label="Key Skills to Highlight" value={clData.keySkills} onChange={(v) => setClData({...clData, keySkills: v})} placeholder="Mention 3-4 top skills..." />
+              <Textarea label="Key Achievements to Highlight" value={clData.keySkills} onChange={(v) => setClData({...clData, keySkills: v})} placeholder="Mention 3-4 top achievements or relevant projects..." />
               
               <button 
                 type="submit"
                 disabled={loading}
                 className="w-full bg-emerald-600 text-white py-5 rounded-full font-bold hover:bg-emerald-700 transition-all shadow-sm shadow-emerald-200 flex items-center justify-center gap-3 disabled:opacity-50"
               >
-                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Sparkles className="w-5 h-5" /> Generate Cover Letter</>}
+                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Sparkles className="w-5 h-5" /> Generate Professional Cover Letter</>}
               </button>
             </form>
           )}

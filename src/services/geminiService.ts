@@ -61,18 +61,34 @@ export async function generateCoverLetter(userData: {
   companyName: string;
   experienceSummary: string;
   keySkills: string;
+  hiringManager?: string;
+  companyValues?: string;
+  tone: 'Professional' | 'Enthusiastic' | 'Confident';
 }) {
   try {
     const prompt = `
-      Write a professional and compelling cover letter for:
-      Name: ${userData.fullName}
+      Write a highly tailored and professional cover letter for the Nigerian job market:
+      
+      APPLICANT DETAILS:
+      Full Name: ${userData.fullName}
+      Key Skills: ${userData.keySkills}
+      Experience Summary: ${userData.experienceSummary}
+      
+      JOB DETAILS:
       Applying for: ${userData.jobTitle}
       At Company: ${userData.companyName}
-      Experience Background: ${userData.experienceSummary}
-      Key Skills: ${userData.keySkills}
+      Hiring Manager (if known): ${userData.hiringManager || "Hiring Manager"}
+      Company Values/Mission: ${userData.companyValues || "Not specified"}
       
-      The output should be in Markdown format, following a standard business letter structure.
-      It should be persuasive, enthusiastic, and professionally tailored for Nigerian employers.
+      REQUIRED TONE: ${userData.tone}
+      
+      INSTRUCTIONS:
+      1. Address the recipient formally (e.g., Dear ${userData.hiringManager || "Hiring Manager"}).
+      2. Start with a strong opening paragraph mentioning the ${userData.jobTitle} role.
+      3. Connect the applicant's experience (${userData.experienceSummary}) and skills (${userData.keySkills}) directly to the needs of ${userData.companyName}.
+      4. If company values are provided (${userData.companyValues}), mention how the applicant aligns with them.
+      5. Output in professional Markdown format with standard letter spacing.
+      6. Ensure the closing is professional (e.g., Yours faithfully/sincerely for Nigerian standards).
     `;
 
     const response = await ai.models.generateContent({
