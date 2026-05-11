@@ -12,13 +12,18 @@ import { cn } from '../lib/utils';
 export function Scholarships() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedField, setSelectedField] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const allFields = ['All', ...new Set(FEATURED_SCHOLARSHIPS.flatMap(s => s.fieldOfStudy))];
 
   const filteredScholarships = FEATURED_SCHOLARSHIPS.filter(s => {
     const matchesCategory = selectedCategory === 'All' || s.category === selectedCategory;
     const matchesField = selectedField === 'All' || s.fieldOfStudy.includes(selectedField) || s.fieldOfStudy.includes('All Fields');
-    return matchesCategory && matchesField;
+    const matchesSearch = searchQuery === '' || 
+      s.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      s.provider.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesCategory && matchesField && matchesSearch;
   });
 
   return (
@@ -44,6 +49,20 @@ export function Scholarships() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 pb-20">
+        {/* Search Bar */}
+        <div className="max-w-3xl mx-auto mb-8">
+           <div className="relative group">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
+              <input 
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search scholarship title or provider..."
+                className="w-full bg-white border border-slate-200 rounded-[2rem] py-5 pl-16 pr-8 shadow-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none text-slate-700 font-medium transition-all"
+              />
+           </div>
+        </div>
+
         <div className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-200 mb-12 flex flex-col md:flex-row gap-8 items-center justify-between">
           <div className="flex flex-wrap items-center gap-2">
             {['All', 'Undergraduate', 'Postgraduate', 'Research', 'Short Course'].map((cat) => (
