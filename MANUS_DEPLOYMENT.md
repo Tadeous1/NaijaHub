@@ -40,3 +40,16 @@ GET /api/auth/me
 ```
 
 Then register a test account, sign in, sign out, and confirm that an admin account can open `/post-a-listing`. Do not use a real applicant’s sensitive CV information during smoke testing.
+
+## Importing verified listings
+
+The repository includes `scripts/import-listings.mjs`, which imports the approved starter set of verified opportunities through the protected admin endpoint. Run it only after the full-stack host is available and provide the host URL, configured admin email, and admin password at runtime:
+
+```text
+NAJIAHUB_BASE_URL=https://<your-manus-host> \
+ADMIN_EMAIL=elishao2000@gmail.com \
+ADMIN_PASSWORD=<provided-at-runtime> \
+node scripts/import-listings.mjs
+```
+
+The importer does not contain credentials. Each record carries an `externalId` for idempotent reruns, an `applicationUrl` for the official destination, and a separate `sourceUrl` for provenance. Review deadlines before each rerun because opportunities can expire after the source pages change. Do not import a listing as active after its closing date.

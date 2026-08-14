@@ -38,7 +38,7 @@ export function createUser(name: string, email: string, password: string) {
 
 export function authenticate(email: string, password: string) {
   const user = db.findUserByEmail(email.trim().toLowerCase()) as any;
-  if (!user || !bcrypt.compareSync(password, user.password_hash)) throw new Error('Invalid email or password');
+  if (!user || !bcrypt.compareSync(password, user.passwordHash)) throw new Error('Invalid email or password');
   return user;
 }
 
