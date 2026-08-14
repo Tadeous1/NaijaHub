@@ -21,6 +21,7 @@ export function AITools() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [showFormats, setShowFormats] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
 
@@ -43,6 +44,7 @@ export function AITools() {
     e.preventDefault();
     setLoading(true);
     setResult(null);
+    setErrorMessage('');
     try {
       const cv = await generateCV({ ...cvData, template: selectedTemplate });
       if (cv) {
@@ -56,8 +58,8 @@ export function AITools() {
       } else {
         setResult('No content generated');
       }
-    } catch (err) {
-      alert('Failed to generate CV. Please check your internet connection and try again.');
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to generate CV. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -67,6 +69,7 @@ export function AITools() {
     e.preventDefault();
     setLoading(true);
     setResult(null);
+    setErrorMessage('');
     try {
       const cl = await generateCoverLetter(clData);
       if (cl) {
@@ -79,8 +82,8 @@ export function AITools() {
       } else {
         setResult('No content generated');
       }
-    } catch (err) {
-      alert('Failed to generate Cover Letter. Please check your internet connection and try again.');
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to generate cover letter. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -94,7 +97,7 @@ export function AITools() {
     }
   };
 
-  const handleDownload = (format: 'txt' | 'pdf' | 'docx' | 'md') => {
+  const handleDownload = (format: 'txt' | 'pdf' | 'rtf' | 'md') => {
     if (!result) return;
     
     const fileName = `${activeTool}_Nigerian_JobPortal`;
@@ -122,9 +125,9 @@ export function AITools() {
       let extension: string = format;
       
       if (format === 'md') type = 'text/markdown';
-      if (format === 'docx') {
-        type = 'application/msword';
-        extension = 'doc'; // Using .doc for accessibility
+      if (format === 'rtf') {
+        type = 'application/rtf';
+        extension = 'rtf';
       }
 
       const element = document.createElement("a");
@@ -373,6 +376,7 @@ export function AITools() {
 
         {/* Result Column */}
         <div ref={resultRef} className="lg:sticky lg:top-24 mt-8 lg:mt-0">
+          {errorMessage ? <p role="alert" className="mb-4 rounded-2xl bg-rose-50 px-5 py-4 text-sm font-semibold text-rose-700">{errorMessage}</p> : null}
           <AnimatePresence mode="wait">
             {!result && !loading ? (
               <motion.div 
@@ -431,7 +435,7 @@ export function AITools() {
                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                 className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50 min-w-[160px]"
                               >
-                                {(['txt', 'pdf', 'docx', 'md'] as const).map((fmt) => (
+                                {(['txt', 'pdf', 'rtf', 'md'] as const).map((fmt) => (
                                   <button
                                     key={fmt}
                                     onClick={() => handleDownload(fmt)}

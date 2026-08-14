@@ -1,0 +1,18 @@
+import { FormEvent, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { LockKeyhole, Mail, UserRound } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+
+export function AuthPage() {
+  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const { user, signIn, register } = useAuth();
+  const navigate = useNavigate();
+  if (user) return <div className="max-w-xl mx-auto px-4 py-20 text-center"><h1 className="text-3xl font-bold text-slate-900">You are already signed in</h1><p className="mt-3 text-slate-500">Continue to your listing tools or return to the opportunity hub.</p><div className="mt-8 flex justify-center gap-3"><Link to="/post-a-listing" className="rounded-full bg-emerald-600 px-6 py-3 font-bold text-white">Post a Listing</Link><Link to="/" className="rounded-full bg-slate-100 px-6 py-3 font-bold text-slate-700">Home</Link></div></div>;
+  async function submit(event: FormEvent) { event.preventDefault(); setBusy(true); setError(''); try { if (mode === 'login') await signIn(email, password); else await register(name, email, password); navigate('/post-a-listing'); } catch (err: any) { setError(err.message); } finally { setBusy(false); } }
+  return <div className="max-w-md mx-auto px-4 py-16"><div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-xl"><div className="mb-8"><p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-600">NaijaHub account</p><h1 className="mt-2 text-3xl font-bold text-slate-900">{mode === 'login' ? 'Sign in to continue' : 'Create your account'}</h1><p className="mt-2 text-sm text-slate-500">Applicants can save applications. Approved admins can publish and import listings.</p></div><form onSubmit={submit} className="space-y-4">{mode === 'register' ? <label className="block text-sm font-bold text-slate-700">Name<div className="mt-2 flex items-center gap-2 rounded-xl border border-slate-200 px-3"><UserRound className="h-4 w-4 text-slate-400"/><input required value={name} onChange={e => setName(e.target.value)} className="w-full py-3 outline-none" /></div></label> : null}<label className="block text-sm font-bold text-slate-700">Email<div className="mt-2 flex items-center gap-2 rounded-xl border border-slate-200 px-3"><Mail className="h-4 w-4 text-slate-400"/><input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full py-3 outline-none" /></div></label><label className="block text-sm font-bold text-slate-700">Password<div className="mt-2 flex items-center gap-2 rounded-xl border border-slate-200 px-3"><LockKeyhole className="h-4 w-4 text-slate-400"/><input required minLength={8} type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full py-3 outline-none" /></div></label>{error ? <p role="alert" className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">{error}</p> : null}<button disabled={busy} className="w-full rounded-full bg-emerald-600 py-3 font-bold text-white disabled:opacity-50">{busy ? 'Please wait…' : mode === 'login' ? 'Sign In' : 'Create Account'}</button></form><button onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); }} className="mt-6 text-sm font-bold text-emerald-700">{mode === 'login' ? 'Need an account? Register' : 'Already have an account? Sign in'}</button></div></div>;
+}

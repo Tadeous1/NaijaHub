@@ -15,8 +15,8 @@ export function Footer() {
         <button className="hover:text-emerald-600 transition-colors">Privacy Policy</button>
       </div>
       <div className="hidden md:flex gap-4">
-        <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 5,000+ Active Jobs</span>
-        <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span> 200+ Scholarships</span>
+        <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Verified listings</span>
+        <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Source-linked applications</span>
       </div>
     </footer>
   );
